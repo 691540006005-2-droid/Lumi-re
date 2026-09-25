@@ -594,11 +594,12 @@
             el.textContent = item.text;
 
             el.addEventListener('click', () => {
-                audio.currentTime = item.time;
-                if (audio.paused) {
-                    audio.play().catch(e => console.log('Playback error:', e));
-                }
-            });
+    audio.currentTime = item.time;
+    updateLyricHighlight(item.time); // <--- แทรกไว้ตรงนี้
+    if (audio.paused) {
+        audio.play().catch(e => console.log('Playback error:', e));
+    }
+});
 
             lyricsContainer.appendChild(el);
         });
