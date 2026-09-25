@@ -610,40 +610,49 @@
     /**
      * Highlight current active line and smooth scroll into view
      */
-    function updateLyricHighlight(currentTime) {
-        if (parsedLyrics.length === 0) return;
+   function updateLyricHighlight(currentTime) {
+    if (parsedLyrics.length === 0) return;
 
-        let activeIdx = -1;
-        for (let i = 0; i < parsedLyrics.length; i++) {
-            if (currentTime >= parsedLyrics[i].time) {
-                activeIdx = i;
-            } else {
-                break;
-            }
+    let activeIdx = -1;
+    for (let i = 0; i < parsedLyrics.length; i++) {
+        if (currentTime >= parsedLyrics[i].time) {
+            activeIdx = i;
+        } else {
+            break;
         }
-
-        if (activeIdx === currentActiveLyricIndex) return;
-        currentActiveLyricIndex = activeIdx;
-
-        const lines = lyricsContainer.querySelectorAll('.lyric-line');
-        lines.forEach((line, idx) => {
-            line.classList.remove('active', 'passed', 'future');
-            if (idx < activeIdx) {
-                line.classList.add('passed');
-            } else if (idx === activeIdx) {
-                line.classList.add('active');
-                
-                if (isAutoScroll) {
-                    line.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }
-            } else {
-                line.classList.add('future');
-            }
-        });
     }
+
+    if (activeIdx === currentActiveLyricIndex) return;
+
+    const lines = lyricsContainer.children;
+    
+    // ลบสถานะออกจากบรรทัดเดิม (ไม่ต้องวนลูป DOM ทั้งหมด)
+    if (currentActiveLyricIndex !== -1 && lines[currentActiveLyricIndex]) {
+        lines[currentActiveLyricIndex].classList.remove('active');
+        lines[currentActiveLyricIndex].classList.add('passed');
+    }
+
+    currentActiveLyricIndex = activeIdx;
+
+    // ใส่สถานะให้บรรทัดใหม่
+    if (activeIdx !== -1 && lines[activeIdx]) {
+        const activeLine = lines[activeIdx];
+        activeLine.classList.remove('future', 'passed');
+        activeLine.classList.add('active');
+
+        if (isAutoScroll) {
+            const containerHeight = lyricsContainer.clientHeight;
+            const lineTop = activeLine.offsetTop;
+            const lineHeight = activeLine.clientHeight;
+
+            // คำนวณตำแหน่งให้อยู่ตรงกลาง Container
+            lyricsContainer.scrollTo({
+                top: lineTop - (containerHeight / 2) + (lineHeight / 2),
+                behavior: 'smooth'
+            });
+        }
+    }
+}
 
     /**
      * Initialize Web Audio API Analyser for dynamic Visualizer canvas
